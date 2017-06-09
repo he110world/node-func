@@ -47,6 +47,23 @@ function wrap (code) {
 	return wrap_code;
 }
 
+function create_func (code) {
+	let wrap_code = wrap(code);
+	let func = vm.createScript(wrap_code);
+
+	// one context for each script
+	let context = vm.createContext();
+
+	// add some useful libs to context
+	context.redis = redis_cli_vm;
+	context.console = console;
+	context.env = vm_env;
+	context.ctx_queue = [];	// shared queue to store req/res
+
+	// cache
+	return {func:func, context:context};
+}
+
 // script cache
 async function get_func (func_name) {
 	let vm_func = vm_lut[func_name];
@@ -61,24 +78,8 @@ async function get_func (func_name) {
 			return null;
 		} else {
 			try {
-				let wrap_code = wrap(code);
-				console.log('wrap code', code, wrap_code);
-				let func = vm.createScript(wrap_code);
-
-				// one context for each script
-				let context = vm.createContext();
-
-				// add some useful libs to context
-				context.redis = redis_cli_vm;
-				context.console = console;
-				context.env = vm_env;
-				context.ctx_queue = [];	// shared queue to store req/res
-
-				// cache
-				let func_info = {func:func, context:context};
+				let func_info = create_func(code);
 				vm_func = vm_lut[func_name] = func_info
-
-				console.log('compiled', wrap_code);
 
 				// done
 				return func_info;
@@ -105,6 +106,18 @@ async function run_func (func_info, ctx) {
 	});
 }
 
+function begin_profile (name) {
+	console.log('begin:', name);
+	console.time('exec time');
+}
+
+function end_profile () {
+	console.timeEnd('exec time');
+	console.log('mem:', parseInt(process.memoryUsage().heapTotal / 1024 / 1024), 'MB');
+	console.log('end');
+}
+
+
 // execute a function
 router.post('/api', async (ctx, next) => {
 	let name = ctx.request.body.func;
@@ -120,11 +133,25 @@ router.post('/api', async (ctx, next) => {
 		return;
 	}
 
-	console.time('api');
+	begin_profile(name);
 	await run_func(func_info, ctx);
-	console.timeEnd('api');
-
-	console.log('run', name);
+	end_profile();
 });
+
+// test run
+router.post('/test', async (ctx, next) => {
+	let input = ctx.request.body;
+	if (!input.code) {
+		ctx.body = 'Error';
+		return;
+	}
+
+	let func_info = create_func(input.code);
+
+	begin_profile('test');
+	await run_func(func_info, ctx);
+	end_profile();
+});
+
 
 module.exports = router
