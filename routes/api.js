@@ -6,6 +6,22 @@ const bluebird = require('bluebird');
 const redis = require('redis');
 const redis_cli = bluebird.promisifyAll(redis.createClient('redis://redis'));
 
+// subscribe needs its own client
+const redis_sub = redis.createClient('redis://redis');
+
+// subscribe on func update events
+redis_sub.on('message', function(channel, message){
+	if (channel === 'func:dirty') {
+		let func_name = message;
+		if (vm_lut[func_name]) {
+			delete vm_lut[func_name];
+		}
+
+		console.log('dirty');
+	}
+});
+redis_sub.subscribe('func:dirty');
+
 // redis client for vm
 const redis_cli_vm = bluebird.promisifyAll(redis.createClient('redis://redis'));
 
@@ -19,10 +35,15 @@ let vm_env = {};	// 'global' for vm
 function wrap (code) {
 	let wrap_code = `(async function(){\n
 		let ctx = ctx_queue.shift();\n
-		${code}\n
-		ctx.resolve();
+		try{
+			${code}\n
+			ctx.resolve();\n
+		}catch(e){\n
+			ctx.status = 500;\n
+			ctx.body = e.message;\n
+			ctx.resolve();\n
+		}\n
 	})()`;
-
 	return wrap_code;
 }
 
@@ -35,11 +56,9 @@ async function get_func (func_name) {
 		let key = 'func:' + func_name;
 		let code = await redis_cli.getAsync(key);
 
-		//1
-		console.log(code);
-
 		if (!code) {
 			console.log('Failed to load func:', func_name);
+			return null;
 		} else {
 			try {
 				let wrap_code = wrap(code);
@@ -78,8 +97,9 @@ async function get_func (func_name) {
 }
 
 async function run_func (func_info, ctx) {
-	return new Promise((resolve)=>{
+	return new Promise((resolve, reject)=>{
 		ctx.resolve = resolve;
+		ctx.reject = reject;
 		func_info.context.ctx_queue.push(ctx);
 		func_info.func.runInContext(func_info.context);
 	});
@@ -100,12 +120,9 @@ router.post('/api', async (ctx, next) => {
 		return;
 	}
 
+	console.time('api');
 	await run_func(func_info, ctx);
-
-	// pass req & res to vm
-	// how to pass req & res? just fetch them from the queue!
-//	func_info.context.ctx_queue.push(ctx);
-//	func_info.func.runInContext(func_info.context);
+	console.timeEnd('api');
 
 	console.log('run', name);
 });

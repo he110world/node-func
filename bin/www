@@ -8,11 +8,16 @@ var app = require('../app');
 var debug = require('debug')('demo:server');
 var http = require('http');
 
+// args
+var argv = require('yargs').argv;
+var is_func = argv.mode==='func';
+
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+var default_port = is_func ? '3000' : '4000';
+var port = normalizePort(argv.port || process.env.PORT || default_port);
 // app.set('port', port);
 
 /**
@@ -82,9 +87,11 @@ function onError(error) {
  */
 
 function onListening() {
+	console.log('Started in', is_func?'func':'api', 'mode');
+
   var addr = server.address();
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
-  debug('Listening on ' + bind);
+  console.log('Listening on ' + bind);
 }

@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+	  "func": "node bin/www --mode=func --port=3000",
+	  "api": "node bin/www --mode=api --port=4000",
     "start": "node bin/www",
     "dev": "./node_modules/.bin/nodemon bin/www",
     "prd": "pm2 start bin/www",
@@ -21,7 +23,8 @@
     "koa-static": "^3.0.0",
     "koa-views": "^5.2.1",
     "pug": "^2.0.0-rc.1",
-    "redis": "^2.7.1"
+    "redis": "^2.7.1",
+    "yargs": "^8.0.1"
   },
   "devDependencies": {
     "nodemon": "^1.8.1"

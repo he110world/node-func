@@ -45,20 +45,11 @@ router.post('/set', async (ctx, next) => {
 
 	let key = 'func:' + params.name;
 	await redis_cli.setAsync(key, params.code);
+	redis_cli.publish('func:dirty', params.name);
 
 	ctx.body = 'Ok';
+
+	console.log('set');
 });
-
-/*
-router.get('/string', async (ctx, next) => {
-  ctx.body = 'koa2 string'
-})
-
-router.get('/json', async (ctx, next) => {
-  ctx.body = {
-    title: 'koa2 json'
-  }
-})
-*/
 
 module.exports = router

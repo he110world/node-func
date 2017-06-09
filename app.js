@@ -9,9 +9,13 @@ const logger = require('koa-logger')
 const index = require('./routes/index')
 const users = require('./routes/users')
 
+// args
+const argv = require('yargs').argv;
+const is_func = argv.mode === 'func';
+
 // func
-const func = require('./routes/func');
-const api = require('./routes/api');
+const func = is_func ? require('./routes/func') : null;
+const api = !is_func ? require('./routes/api') : null;
 
 // error handler
 onerror(app)
@@ -41,7 +45,10 @@ app.use(index.routes(), index.allowedMethods())
 app.use(users.routes(), users.allowedMethods())
 
 // func routes
-app.use(func.routes(), func.allowedMethods());
-app.use(api.routes(), api.allowedMethods());
+if (is_func) {
+	app.use(func.routes(), func.allowedMethods());
+} else {
+	app.use(api.routes(), api.allowedMethods());
+}
 
 module.exports = app
