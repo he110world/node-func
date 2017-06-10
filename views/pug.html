@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<title>Jade Editor</title>
+
+		<link rel="stylesheet" href="stylesheets/codemirror.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+		<link rel="stylesheet" href="stylesheets/style.css">
+
+		<script src="javascripts/codemirror.js"></script>
+		<script src="javascripts/javascript.js"></script>
+		<script src="javascripts/css.js"></script>
+		<script src="javascripts/xml.js"></script>
+		<script src="javascripts/htmlmixed.js"></script>
+		<script src="javascripts/pug.js"></script>
+		<script src="javascripts/pug.min.js"></script>
+
+		<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+		<!--script src="https://cdnjs.cloudflare.com/ajax/libs/zepto/1.1.6/zepto.min.js"></script-->
+	</head>
+	<body>
+		<div class="container header">
+			<div class="row">
+				<div class="twelve columns">
+					<span class="app-name">Pug Live!</span>
+				</div>
+			</div>
+		</div>
+
+		<div class="container pug-editor">
+			<div class="row">
+				<div class="twelve columns">
+					<div id="rendered" class="rendered-html"></div>
+				</div>
+
+			</div>
+			<br>
+			<div class="row">
+				<div class="six columns">
+					<textarea id="pug-source">extends _bootstrap
+block body
+ </textarea>
+				</div>
+				<div class="six columns">
+					<textarea id="html-source">
+					</textarea>
+				</div>
+			</div>
+		</div>
+
+
+		<script src="javascripts/puglive.js">
+		</script>
+
+
+
+	</body>
+</html>

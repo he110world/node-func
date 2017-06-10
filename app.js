@@ -5,6 +5,7 @@ const json = require('koa-json')
 const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
+const cors = require('koa-cors');
 
 const index = require('./routes/index')
 const users = require('./routes/users')
@@ -15,12 +16,14 @@ const is_func = argv.mode === 'func';
 
 // func
 const func = is_func ? require('./routes/func') : null;
+const pug = is_func ? require('./routes/pug') : null;
 const api = !is_func ? require('./routes/api') : null;
 
 // error handler
 onerror(app)
 
 // middlewares
+app.use(cors());
 app.use(bodyparser({
   enableTypes:['json', 'form', 'text']
 }))
@@ -45,10 +48,14 @@ app.use(index.routes(), index.allowedMethods())
 app.use(users.routes(), users.allowedMethods())
 
 // func routes
-if (is_func) {
+if (func) {
 	app.use(func.routes(), func.allowedMethods());
-} else {
+}
+if (api) {
 	app.use(api.routes(), api.allowedMethods());
+}
+if (pug) {
+	app.use(pug.routes(), pug.allowedMethods());
 }
 
 module.exports = app
