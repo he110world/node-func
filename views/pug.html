@@ -5,7 +5,7 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
-		<title>Jade Editor</title>
+		<title>Pug Live</title>
 
 		<link rel="stylesheet" href="stylesheets/codemirror.css">
 		<!--link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css"-->
@@ -21,7 +21,6 @@
 		<script src="javascripts/pug.min.js"></script>
 
 		<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
-		<!--script src="https://cdnjs.cloudflare.com/ajax/libs/zepto/1.1.6/zepto.min.js"></script-->
 	</head>
 	<body>
 		<div class="container header">
@@ -41,14 +40,20 @@
 			</div>
 			<br>
 			<div class="row">
-				<div class="col-sm-6">
+				<div class="col-sm-12">
 					<textarea id="pug-source">extends _bootstrap
 block body
  </textarea>
 				</div>
+			</div>
+			<br>
+			<div class="row">
 				<div class="col-sm-6">
-					<textarea id="html-source">
-					</textarea>
+					<textarea id="json-source"></textarea>
+				</div>
+
+				<div class="col-sm-6">
+					<textarea id="html-source"></textarea>
 				</div>
 			</div>
 		</div>

@@ -11,7 +11,19 @@ var editorOptions = {
 
 function compile () {
 	var pug_source = editor.getValue();
-	$.post('/pug/compile', {code:pug_source}, 'json')
+	var payload;
+	try{
+		payload = JSON.parse(json_editor.getValue());
+	} catch(e){
+		console.log(e.message);
+	}
+
+	var post_data = {code:pug_source};
+	if (payload){
+		post_data.payload = payload;
+	}
+
+	$.post('/pug/compile', post_data, 'json')
 	.done(function(data, stat){
 		console.log(stat);
 		var html = data.compiled;
@@ -51,9 +63,20 @@ var htmlOptions = {
 };
 var html_editor = CodeMirror.fromTextArea($('#html-source').get(0), htmlOptions);
 
+// json
+var json_options = {
+	mode: {name: 'application/json', alignCDATA: true},
+	lineNumbers: true,
+	tabSize: 2,
+	lineWrapping: true,
+	indentWithTabs: false,
+}
+var json_editor = CodeMirror.fromTextArea($('#json-source').get(0), json_options);
+
 on_change();
 
 editor.on('changes', on_change);
+json_editor.on('changes', on_change);
 
 
 

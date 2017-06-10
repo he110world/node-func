@@ -17,8 +17,16 @@ router.post('/pug/compile', async (ctx, next) => {
 		pretty:true,
 		filename:path.join(__dirname, '../node_modules/pug-bootstrap/_bootstrap.pug'),
 	};
-	let compiled = pug.compile(code, options);
-	ctx.body = {compiled:compiled()};
+
+	// test payload
+	let payload = ctx.request.body.payload;
+	if (typeof payload === 'object') {
+		for(var k in payload) {
+			options[k] = payload[k];
+		}
+	}
+	let html = pug.render(code, options);
+	ctx.body = {compiled:html};
 });
 
 module.exports = router
