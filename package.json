@@ -12,7 +12,6 @@
   "dependencies": {
     "bluebird": "^3.5.0",
     "debug": "^2.6.3",
-    "jade-bootstrap": "^1.0.14",
     "koa": "^2.2.0",
     "koa-bodyparser": "^3.2.0",
     "koa-convert": "^1.2.0",
@@ -24,6 +23,7 @@
     "koa-static": "^3.0.0",
     "koa-views": "^5.2.1",
     "pug": "^2.0.0-rc.2",
+    "pug-bootstrap": "0.0.15",
     "redis": "^2.7.1",
     "yargs": "^8.0.1"
   },

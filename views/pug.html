@@ -8,8 +8,9 @@
 		<title>Jade Editor</title>
 
 		<link rel="stylesheet" href="stylesheets/codemirror.css">
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+		<!--link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css"-->
 		<link rel="stylesheet" href="stylesheets/style.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
 
 		<script src="javascripts/codemirror.js"></script>
 		<script src="javascripts/javascript.js"></script>
@@ -25,7 +26,7 @@
 	<body>
 		<div class="container header">
 			<div class="row">
-				<div class="twelve columns">
+				<div class="col-sm-12">
 					<span class="app-name">Pug Live!</span>
 				</div>
 			</div>
@@ -33,19 +34,19 @@
 
 		<div class="container pug-editor">
 			<div class="row">
-				<div class="twelve columns">
+				<div class="col-sm-12">
 					<div id="rendered" class="rendered-html"></div>
 				</div>
 
 			</div>
 			<br>
 			<div class="row">
-				<div class="six columns">
+				<div class="col-sm-6">
 					<textarea id="pug-source">extends _bootstrap
 block body
  </textarea>
 				</div>
-				<div class="six columns">
+				<div class="col-sm-6">
 					<textarea id="html-source">
 					</textarea>
 				</div>

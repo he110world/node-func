@@ -15,7 +15,7 @@ router.post('/pug/compile', async (ctx, next) => {
 
 	let options = {
 		pretty:true,
-		filename:path.join(__dirname, '../node_modules/jade-bootstrap/_bootstrap.pug'),
+		filename:path.join(__dirname, '../node_modules/pug-bootstrap/_bootstrap.pug'),
 	};
 	let compiled = pug.compile(code, options);
 	ctx.body = {compiled:compiled()};
