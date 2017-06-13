@@ -34,11 +34,7 @@ function compile () {
 		console.log(stat);
 		var html = data.compiled;
 		html_editor.setValue(html);
-		$('#rendered').html(html);
-		var dropdown = $('#rendered .dropdown-toggle');
-		if (dropdown && typeof dropdown.dropdown === 'function') {
-			dropdown.dropdown();
-		}
+		document.getElementById("rendered").srcdoc = html;
 
 	})
 	.fail(function(xhr){
@@ -61,6 +57,7 @@ function on_change() {
 }
 
 var pug_editor = CodeMirror.fromTextArea($('#pug-source').get(0), editorOptions);
+pug_editor.setSize('100%', 100);
 
 
 // html
@@ -73,6 +70,7 @@ var htmlOptions = {
 	readOnly: true,
 };
 var html_editor = CodeMirror.fromTextArea($('#html-source').get(0), htmlOptions);
+html_editor.setSize('100%', 100);
 
 // json
 var json_options = {
@@ -83,6 +81,7 @@ var json_options = {
 	indentWithTabs: true,
 };
 var json_editor = CodeMirror.fromTextArea($('#json-source').get(0), json_options);
+json_editor.setSize('100%', 100);
 
 // js
 var js_options = {
@@ -91,6 +90,7 @@ var js_options = {
 	indentWithTabs: true,
 };
 var js_editor = CodeMirror.fromTextArea($('#js-source').get(0), js_options);
+js_editor.setSize('100%', 100);
 
 
 on_change();
@@ -341,6 +341,5 @@ $(document).ready(function () {
 			insert_str(pug_editor, s.snipet, s.no_new_line);
 		}
 	});
-
 
 });
