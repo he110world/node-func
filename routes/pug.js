@@ -15,7 +15,7 @@ router.post('/pug/compile', async (ctx, next) => {
 
 	let options = {
 		pretty:true,
-		filename:path.join(__dirname, '../node_modules/pug-bootstrap/_bootstrap.pug'),
+		filename:path.join(__dirname, '../node_modules/pug-bootstrap-attr/_bootstrap.pug'),
 	};
 
 	// test payload
