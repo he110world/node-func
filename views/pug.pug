@@ -1,0 +1,236 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset="utf-8")
+        meta(http-equiv="X-UA-Compatible", content="IE=edge")
+        meta(name="viewport", content="width=device-width, initial-scale=1")
+        title Pug Live
+        link(rel="stylesheet", href="/stylesheets/codemirror.css")
+        link(rel="stylesheet", href="/stylesheets/style.css")
+        link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css")
+        link(rel="stylesheet", href="/stylesheets/bootstrap-autocolumns.css")
+        script(src="/javascripts/codemirror.js")
+        script(src="/javascripts/javascript.js")
+        script(src="/javascripts/css.js")
+        script(src="/javascripts/xml.js")
+        script(src="/javascripts/htmlmixed.js")
+        script(src="/javascripts/pug.js")
+        script(src="/javascripts/pug.min.js")
+        script(src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js")
+        script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js")
+    body
+        .container.pug-editor
+            // Preview
+            .row
+                .col-sm-auto
+                    h5 Preview
+                .col-sm-auto
+                    #page-dropdown.dropdown
+                        button.btn.btn-default.dropdown-toggle(type="button", data-toggle="dropdown")
+                            | Pages 
+                            span.caret
+                        ul.dropdown-menu(role="menu", aria-labelledby="dropdownMenu1")
+                            li(role="presentation")
+                                a(role="menuitem", tabindex="-1") Load
+                            li(role="presentation")
+                                a(role="menuitem", tabindex="-1") Save
+                            li(role="presentation")
+                                a(role="menuitem", tabindex="-1") Save As
+            .row
+                .col-sm-12
+                    iframe#rendered(style="width:100%; height:500px;", sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals", srcdoc="")
+            br
+            // Pug editor
+            #pug-editor-main.row
+                .col-sm-12
+                    .row
+                        .col-sm-auto
+                            h5 Pug
+                        .col-sm-auto
+                            #pug-grid.dropdown
+                                button.btn.btn-default.dropdown-toggle(type="button", data-toggle="dropdown")
+                                    | Grid 
+                                    span.caret
+                                ul.dropdown-menu(role="menu", aria-labelledby="dropdownMenu1")
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") container
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") container-fluid
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") row
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") col-sm-1
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") col-sm-2
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") col-sm-3
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") col-sm-4
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") col-sm-5
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") col-sm-6
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") col-sm-7
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") col-sm-8
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") col-sm-9
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") col-sm-10
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") col-sm-11
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") col-sm-12
+                        .col-sm-auto
+                            #pug-snipets.dropdown
+                                button.btn.btn-default.dropdown-toggle(type="button", data-toggle="dropdown")
+                                    | Snipets 
+                                    span.caret
+                                ul.dropdown-menu(role="menu", aria-labelledby="dropdownMenu1")
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") id
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") if else
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") case
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") each list
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") each obj
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") js eval
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") while
+                        .col-sm-auto
+                            #pug-components.dropdown
+                                button.btn.btn-default.dropdown-toggle(type="button", data-toggle="dropdown")
+                                    | Components 
+                                    span.caret
+                                ul.dropdown-menu(role="menu", aria-labelledby="dropdownMenu1")
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") Accordion
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") Alerts
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") Badges
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") Buttons
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") Carousel
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") Dropdowns
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") Forms
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") Glyphicons
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") Images
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") Labels
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") List Groups
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") Modals
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") Navbar
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") Navs
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") Panels
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") Progress Bars
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") Tables
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") Tabs
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") Toggle
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") Tooltips
+                                    li(role="presentation")
+                                        a(role="menuitem", tabindex="-1") URL
+
+                    if pug_source
+                         textarea#pug-source !{pug_source}
+                    else
+                         textarea#pug-source
+                                | extends _bootstrap
+                                | block body
+
+            br
+            .row
+                .col-sm-12
+                    h5 Javascript
+                    if js_source
+                        textarea#js-source !{js_source}
+                    else
+                        textarea#js-source
+            br
+            .row
+                .col-sm-6
+                    h5 Json Payload
+                    if json_source
+                        textarea#json-source !{json_source}
+                    else
+                        textarea#json-source
+                            | {
+                            | }
+                .col-sm-6
+                    h5 Generated HTML
+                    textarea#html-source
+            // End Pug editor
+            div
+                // load page
+                // button.btn.btn-primary(data-toggle="modal",data-target="#load-page-modal") Load
+                #load-page-modal.modal.fade(tabindex="-1", role="dialog", aria-labelledby="load-page-modalLabel", aria-hidden="true")
+                    .modal-dialog
+                        .modal-content
+                            .modal-header
+                                button.close(type="button", data-dismiss="modal")
+                                    span(aria-hidden="true") ×
+                                    span.sr-only Close
+                                h4#load-page-modalLabel.modal-title Load
+                            .modal-body
+                                .alert.alert-warning(role="alert")
+                                    | The current page will not be saved.
+                                ul#page-list
+                                .modal-footer
+                                    button.btn.btn-default(type="button", data-dismiss="modal") Close
+                div
+                    // save page
+                    // button.btn.btn-primary(data-toggle="modal",data-target="#save-page-modal") Save
+                    #save-page-modal.modal.fade(tabindex="-1", role="dialog", aria-labelledby="save-page-modalLabel", aria-hidden="true")
+                        .modal-dialog
+                            .modal-content
+                                .modal-header
+                                    button.close(type="button", data-dismiss="modal")
+                                        span(aria-hidden="true") ×
+                                        span.sr-only Close
+                                    h4#save-page-modalLabel.modal-title Save
+                                .modal-body
+                                    .alert.alert-warning(role="alert")
+                                        | This will override the previous page.
+                                .modal-footer
+                                    button.btn.btn-default(type="button", data-dismiss="modal") Close
+                                    button#save-confirm-btn.btn.btn-primary(type="button") Save
+                div
+                    // save as
+                    // button.btn.btn-primary(data-toggle="modal",data-target="#save-as-modal") Save As
+                    #save-as-modal.modal.fade(tabindex="-1", role="dialog", aria-labelledby="save-as-modalLabel", aria-hidden="true")
+                        .modal-dialog
+                            .modal-content
+                                .modal-header
+                                    button.close(type="button", data-dismiss="modal")
+                                        span(aria-hidden="true") ×
+                                        span.sr-only Close
+                                    h4#save-as-modalLabel.modal-title Save As
+                                .modal-body
+                                    fieldset.form-group
+                                        label(for="save-as-name") Page Name:
+                                        input#save-as-name.form-control(type="text")
+                                .modal-footer
+                                    button.btn.btn-default(type="button", data-dismiss="modal") Close
+                                    button#save-as-confirm-btn.btn.btn-primary(type="button") Save
+        script(src="/javascripts/puglive.js")
+

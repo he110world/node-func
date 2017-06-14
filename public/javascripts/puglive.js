@@ -1,5 +1,6 @@
 // have to call require('pug') in order to use pug api
 var pug = require('pug');
+var page_name = '';
 
 // need this, otherwise shift-tab will be broken
 CodeMirror.keyMap.default["Shift-Tab"] = "indentLess";
@@ -24,10 +25,11 @@ function compile () {
 		console.log(e.message);
 	}
 
-	var post_data = {code:pug_source};
+	var post_data = {code:pug_source, js:js_editor.getValue()};
 	if (payload){
 		post_data.payload = payload;
 	}
+	
 
 	$.post('/pug/compile', post_data, 'json')
 	.done(function(data, stat){
@@ -339,6 +341,56 @@ $(document).ready(function () {
 		let s = snipets_str[e.target.text];
 		if (s) {
 			insert_str(pug_editor, s.snipet, s.no_new_line);
+		}
+	});
+
+
+	// save as
+	$('#save-as-confirm-btn').click(function(e){
+		// check page name
+		let name = $('#save-as-name').val().trim();
+		if (name) {
+			let page_info = {};
+			page_info.name = name;
+			page_info.pug_source = pug_editor.getValue();
+			page_info.js_source = js_editor.getValue();
+			page_info.json_source = json_editor.getValue();
+
+			$.post('/pug/save', page_info, function(result){
+				$('#save-as-modal').modal('toggle');
+			});
+		}
+	});
+
+	$('#page-dropdown li a').click(function(e){
+		switch(e.target.text) {
+			case 'Load':
+				// get list
+				$.getJSON('/pug/list', function(data){
+					if (data && data.page_list) {
+						let page_list = $('#page-list');
+						let page_list_html = '';
+						data.page_list.forEach(function(name){
+							page_list_html += `<li><a href="/pug/edit/${name}">${name}</a></li>`;
+						});
+						page_list.html(page_list_html);
+					}
+
+
+					$('#load-page-modal').modal();
+				});
+				// show modal
+				break;
+			case 'Save':
+				if (page_name){
+					$('#save-page-modal').modal();
+				} else {
+					$('#save-as-modal').modal();
+				}
+				break;
+			case 'Save As':
+				$('#save-as-modal').modal();
+				break;
 		}
 	});
 

@@ -27,7 +27,7 @@ router.get('/', async (ctx, next) => {
 // get functions in trash bin
 router.get('/trash', async (ctx, next) => {
 
-	// get a array of function names
+	// get an array of function names
 	let keys = await redis_cli.keysAsync('trash:*');
 
 	// keys are in the form of 'func:name'
