@@ -2,8 +2,8 @@
   "name": "node-func",
   "version": "0.1.0",
   "scripts": {
-    "func": "node bin/www --mode=func --port=3000",
-    "api": "node bin/www --mode=api --port=4000",
+    "func": "./node_modules/.bin/nodemon bin/www --mode=func --port=3000",
+    "api": "./node_modules/.bin/nodemon bin/www --mode=api --port=4000",
     "start": "node bin/www",
     "dev": "./node_modules/.bin/nodemon bin/www",
     "prd": "pm2 start bin/www",

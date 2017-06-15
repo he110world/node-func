@@ -5,11 +5,13 @@ const bluebird = require('bluebird');
 const redis = require('redis');
 const redis_cli = bluebird.promisifyAll(redis.createClient('redis://redis'));
 
-router.prefix('/func');
 
 // get a list of functions
 // draw them
-router.get('/', async (ctx, next) => {
+router.get('/func', async (ctx, next) => {
+	
+	ctx.redirect('/pug/view/func-editor');
+	/*
 
 	// get a array of function names
 	let keys = await redis_cli.keysAsync('func:*');
@@ -22,10 +24,24 @@ router.get('/', async (ctx, next) => {
 		title: 'Have Some Func!',
 		func_names: names
 	});
+	*/
 });
 
+router.get('/func/list', async (ctx, next) => {
+
+	// get a array of function names
+	let keys = await redis_cli.keysAsync('func:*');
+
+	// keys are in the form of 'func:name'
+	// we only need the 'name' part
+	let names = keys.map(name => name.split(':')[1]);
+
+	ctx.body = {func_list:names};
+});
+
+
 // get functions in trash bin
-router.get('/trash', async (ctx, next) => {
+router.get('/func/trash', async (ctx, next) => {
 
 	// get an array of function names
 	let keys = await redis_cli.keysAsync('trash:*');
@@ -42,37 +58,37 @@ router.get('/trash', async (ctx, next) => {
 
 
 // get a function's source code by name
-router.get('/get/:name', async (ctx, next) => {
+router.get('/func/get/:name', async (ctx, next) => {
 	let name = ctx.params.name;
 	let key = 'func:' + name;
 
 	// get it from redis
-	let code = await redis_cli.getAsync(key);
+	let func = await redis_cli.hgetallAsync(key);
 
-	ctx.body = code;
+	ctx.body = func;
 });
 
 // set a function's source code by name
-router.post('/deploy', async (ctx, next) => {
-	let params = ctx.request.body;
-	let func_name = params.name;
-	if (!func_name || !params.code) {
-		ctx.body = 'Error';
+router.post('/func/deploy', async (ctx, next) => {
+	// {name:String, js_source:String, json_source:String}
+	let func = ctx.request.body;
+	if (!func.name || !func.js_source) {
+		ctx.throw('Invalid function', 500);
 		return;
 	}
 
-	let key = 'func:' + func_name;
-	await redis_cli.setAsync(key, params.code);
-	redis_cli.publish('func:dirty', func_name);
+	let key = 'func:' + func.name;
+	await redis_cli.hmsetAsync(key, func);
+	redis_cli.publish('func:dirty', func.name);
 
 	ctx.body = 'Deployed';
 
-	console.log(func_name,'deployed');
+	console.log(func.name,'deployed');
 });
 
 // 'delete' a function
 // not really -- just rename the function to trash:name
-router.post('/del', async (ctx, next) => {
+router.post('/func/del', async (ctx, next) => {
 	let func_name = ctx.request.body.name;
 	if (!func_name) {
 		ctx.throw('Cannot find func', 500);
@@ -88,7 +104,7 @@ router.post('/del', async (ctx, next) => {
 	console.log(func_name,'deleted');
 });
 
-router.post('/rename', async (ctx, next) => {
+router.post('/func/rename', async (ctx, next) => {
 	let old_name = ctx.request.body.old_name;
 	let new_name = ctx.request.body.new_name;
 	if (!old_name || !new_name) {
@@ -111,14 +127,7 @@ router.post('/rename', async (ctx, next) => {
 	console.log(old_name,'renamed to', new_name);
 });
 
-// export all functions to a zip file
-router.get('/export-all-zip', async (ctx, next) => {
+router.get('/func/dump', async (ctx, next) => {
 });
-
-// import a zip file containing functions
-router.post('/import-zip', async (ctx, next) => {
-});
-
-
 
 module.exports = router

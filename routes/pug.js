@@ -16,7 +16,9 @@ function pug_render (code, options, js_name) {
 
 router.get('/pug', async (ctx, next) => {
 	await redis_cli.delAsync(TEMP_JS_NAME);
-	await ctx.render('pug');
+
+	ctx.redirect('/pug/view/pug-editor');
+//	await ctx.render('pug');
 });
 
 router.get('/pug/list', async (ctx, next) => {
@@ -110,10 +112,63 @@ router.get('/pug/view/:name', async (ctx, next) => {
 	let options = {
 		pretty:true,
 		filename:path.join(__dirname, '../node_modules/pug-bootstrap-attr/_bootstrap.pug'),
+//		name:name
 	};
 	let html = pug_render(pug_source, options, name);
 	ctx.body = html;
 });
+
+// get editor page
+router.get('/pug/view/:name/:name2', async (ctx, next) => {
+	let name = ctx.params.name;
+	let name2 = ctx.params.name2;
+	if (!name) {
+		ctx.throw('Cannot find page', 404);
+		return;
+	}
+
+	// get editor
+	let key = 'pug:' + name;
+	let pug_source = await redis_cli.hgetAsync(key, 'pug_source');
+
+	if (!pug_source) {
+		ctx.throw('Cannot find page', 404);
+		return;
+	}
+
+	let options = {
+		pretty:true,
+		filename:path.join(__dirname, '../node_modules/pug-bootstrap-attr/_bootstrap.pug'),
+		name:name
+	};
+
+
+	// get page to edit
+	let key2 = 'pug:' + name2;
+
+	// function editor?
+	// TODO: better handling of function
+	if (name.indexOf('func-editor') != -1) {
+		key2 = 'func:' + name2;
+	}
+
+	let pug_info = await redis_cli.hgetallAsync(key2);
+	if (!pug_info) {
+		ctx.throw('Cannot find page to edit', 404);
+		return;
+	}
+
+//	await ctx.render('pug', pug_info);
+
+	for(let k in pug_info) {
+		options[k] = pug_info[k];
+	}
+
+	let html = pug_render(pug_source, options, name);
+	ctx.body = html;
+});
+
+
 
 // get pug source
 router.get('/pug/pug/:name', async (ctx, next) => {
