@@ -104,6 +104,14 @@ router.post('/func/del', async (ctx, next) => {
 	console.log(func_name,'deleted');
 });
 
+router.post('/func/test', async (ctx, next) => {
+	console.log(ctx.request.body);
+	let result = await ctx.post('/test', ctx.request.body);
+	ctx.body = result;
+//	ctx.body = 'hello';
+//	ctx.redirect('http://api:4000/test');
+});
+
 router.post('/func/rename', async (ctx, next) => {
 	let old_name = ctx.request.body.old_name;
 	let new_name = ctx.request.body.new_name;

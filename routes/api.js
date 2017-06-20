@@ -141,12 +141,23 @@ router.post('/api', async (ctx, next) => {
 // test run
 router.post('/test', async (ctx, next) => {
 	let input = ctx.request.body;
-	if (!input.code) {
+	if (!input.js_source) {
 		ctx.body = 'Error';
 		return;
 	}
 
-	let func_info = create_func(input.code);
+	let func_info = create_func(input.js_source);
+
+	// add payload
+	if (input.json_source) {
+		try {
+			let json = JSON.parse(input.json_source);
+			for(let k in json) {
+				ctx[k] = json[k];
+			}
+		} catch(e) {
+		}
+	}
 
 	begin_profile('test');
 	await run_func(func_info, ctx);

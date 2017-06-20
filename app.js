@@ -5,6 +5,7 @@ const json = require('koa-json')
 const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
+const http_request = require('koa-http-request');
 
 const index = require('./routes/index')
 const users = require('./routes/users')
@@ -47,6 +48,10 @@ app.use(users.routes(), users.allowedMethods())
 
 // func routes
 if (func) {
+	app.use(http_request({
+		timeout: 3000,
+		host: 'http://api:4000'
+		}));
 	app.use(func.routes(), func.allowedMethods());
 }
 if (api) {
