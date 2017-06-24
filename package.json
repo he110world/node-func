@@ -12,6 +12,8 @@
   "dependencies": {
     "bluebird": "^3.5.0",
     "debug": "^2.6.3",
+    "generate-schema": "^2.5.0",
+    "ip": "^1.1.5",
     "jstransformer-markdown-it": "^2.0.0",
     "koa": "^2.2.0",
     "koa-bodyparser": "^3.2.0",
@@ -24,8 +26,9 @@
     "koa-router": "^7.1.1",
     "koa-static": "^3.0.0",
     "koa-views": "^5.2.1",
+    "mongoose": "^4.10.7",
     "pug": "^2.0.0-rc.2",
-    "pug-bootstrap-attr": "0.0.21",
+    "pug-bootstrap-attr": "0.0.23",
     "redis": "^2.7.1",
     "yargs": "^8.0.2"
   },

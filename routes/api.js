@@ -1,10 +1,15 @@
-//const {promisify} = require('util');
 const router = require('koa-router')()
 
 // for function source code storage & messaging
 const bluebird = require('bluebird');
 const redis = require('redis');
 const redis_cli = bluebird.promisifyAll(redis.createClient('redis://redis'));
+const redis_cli_vm = bluebird.promisifyAll(redis.createClient('redis://redis'));	// redis client for vm
+
+
+// mongoose
+const mongoose = require('mongoose');
+mongoose.connect('mongodb://mongo:27017/vm');		// mongo client for vm
 
 // subscribe needs its own client
 const redis_sub = redis.createClient('redis://redis');
@@ -17,13 +22,26 @@ redis_sub.on('message', function(channel, message){
 			delete vm_lut[func_name];
 		}
 
-		console.log('dirty');
+		console.log('func dirty');
+	} else if (channel === 'schema:dirty') {
+		let schema_name = message;
+
+		// reload mongoose schema
+		delete mongoose.models[schema_name];
+		delete mongoose.modelSchemas[schema_name];
+
+		redis_cli.get('schema:'+schema_name, (err, schema_source)=>{
+			try {
+				eval(`mongoose.model('${schema_name}', new mongoose.Schema(${schema_source}))`);
+			} catch (e) {
+				console.log('mongoose error:', e.message);
+			}
+		});
 	}
 });
 redis_sub.subscribe('func:dirty');
+redis_sub.subscribe('schema:dirty');
 
-// redis client for vm
-const redis_cli_vm = bluebird.promisifyAll(redis.createClient('redis://redis'));
 
 // node vm
 const vm = require('vm');
@@ -56,6 +74,7 @@ function create_func (code) {
 
 	// add some useful libs to context
 	context.redis = redis_cli_vm;
+	context.mongoose = mongoose;
 	context.console = console;
 	context.env = vm_env;
 	context.ctx_queue = [];	// shared queue to store req/res
@@ -71,7 +90,7 @@ async function get_func (func_name) {
 	// not cached
 	if (!vm_func) {
 		let key = 'func:' + func_name;
-		let code = await redis_cli.getAsync(key);
+		let code = await redis_cli.hgetAsync(key, 'js_source');
 
 		if (!code) {
 			console.log('Failed to load func:', func_name);
@@ -117,6 +136,24 @@ function end_profile () {
 	console.log('end');
 }
 
+router.get('/api/:func', async (ctx, next) => {
+	let name = ctx.params.func;
+	if (!name) {
+		ctx.body = 'Error';
+		return;
+	}
+
+	// get func
+	let func_info = await get_func(name);
+	if (!func_info) {
+		ctx.body = 'Error';
+		return;
+	}
+
+	begin_profile(name);
+	await run_func(func_info, ctx);
+	end_profile();
+});
 
 // execute a function
 router.post('/api', async (ctx, next) => {

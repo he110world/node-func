@@ -1,6 +1,7 @@
 const router = require('koa-router')()
 const pug = require('pug');
 const path = require('path');
+const ip = require('ip');
 
 const bluebird = require('bluebird');
 const redis = require('redis');
@@ -8,9 +9,16 @@ const redis_cli = bluebird.promisifyAll(redis.createClient('redis://redis'));
 
 const TEMP_JS_NAME = 'pug_temp_js';
 
+//TODO: fuck this
+const api_host = ip.address() + ':4000';
+
 function pug_render (code, options, js_name) {
 	// add script reference
-	let code_patched = code + `\n\tscript(src="/pug/js/${js_name}",type="text/javascript")`;
+	let code_patched = code;
+	
+	if (js_name) {
+		code_patched += `\n\tscript(src="/pug/js/${js_name}",type="text/javascript")`;
+	}
 	return pug.render(code_patched, options);
 }
 
@@ -56,11 +64,7 @@ router.post('/pug/save', async (ctx, next) => {
 	}
 
 	let key = 'pug:' + info.name;
-
 	await redis_cli.hmsetAsync(key, info);
-
-//	ctx.redirect('/pug/get/'+info.name);
-//	ctx.redirect(ctx.router.url('pug','get',info.name));
 
 	ctx.body = 'ok';
 });
@@ -148,21 +152,26 @@ router.get('/pug/view/:name/:name2', async (ctx, next) => {
 
 	// function editor?
 	// TODO: better handling of function
-	if (name.indexOf('func-editor') != -1) {
+	if (name.indexOf('func-editor') !== -1) {
 		key2 = 'func:' + name2;
+		options.api_host = api_host;
+	} else if (name.indexOf('schema-editor') !== -1) {
+		key2 = 'schema:' + name2;
 	}
 
 	let pug_info = await redis_cli.hgetallAsync(key2);
+
 	if (!pug_info) {
 		ctx.throw('Cannot find page to edit', 404);
 		return;
 	}
 
-//	await ctx.render('pug', pug_info);
-
 	for(let k in pug_info) {
 		options[k] = pug_info[k];
 	}
+
+	console.log(options);
+
 
 	let html = pug_render(pug_source, options, name);
 	ctx.body = html;

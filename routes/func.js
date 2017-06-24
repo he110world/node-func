@@ -11,20 +11,6 @@ const redis_cli = bluebird.promisifyAll(redis.createClient('redis://redis'));
 router.get('/func', async (ctx, next) => {
 	
 	ctx.redirect('/pug/view/func-editor');
-	/*
-
-	// get a array of function names
-	let keys = await redis_cli.keysAsync('func:*');
-
-	// keys are in the form of 'func:name'
-	// we only need the 'name' part
-	let names = keys.map(name => name.split(':')[1]);
-
-	await ctx.render('func', {
-		title: 'Have Some Func!',
-		func_names: names
-	});
-	*/
 });
 
 router.get('/func/list', async (ctx, next) => {

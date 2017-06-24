@@ -17,6 +17,7 @@ const is_func = argv.mode === 'func';
 // func
 const func = is_func ? require('./routes/func') : null;
 const pug = is_func ? require('./routes/pug') : null;
+const schema = is_func ? require('./routes/schema') : null;
 const api = !is_func ? require('./routes/api') : null;
 
 // error handler
@@ -44,7 +45,7 @@ app.use(async (ctx, next) => {
 
 // routes
 app.use(index.routes(), index.allowedMethods())
-app.use(users.routes(), users.allowedMethods())
+//app.use(users.routes(), users.allowedMethods())
 
 // func routes
 if (func) {
@@ -59,6 +60,9 @@ if (api) {
 }
 if (pug) {
 	app.use(pug.routes(), pug.allowedMethods());
+}
+if (schema) {
+	app.use(schema.routes(), schema.allowedMethods());
 }
 
 module.exports = app
