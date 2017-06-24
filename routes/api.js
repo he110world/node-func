@@ -6,10 +6,32 @@ const redis = require('redis');
 const redis_cli = bluebird.promisifyAll(redis.createClient('redis://redis'));
 const redis_cli_vm = bluebird.promisifyAll(redis.createClient('redis://redis'));	// redis client for vm
 
+let schema_loaded = false;
+
 
 // mongoose
 const mongoose = require('mongoose');
+mongoose.Promise = Promise;
 mongoose.connect('mongodb://mongo:27017/vm');		// mongo client for vm
+
+// load mongoose schemas
+async function load_schema () {
+	let keys = await redis_cli.keysAsync('schema:*');
+	for(let i=0; i<keys.length; i++){
+		let key = keys[i];
+		let source = await redis_cli.hgetAsync(key, 'source');
+		let name = key.split(':')[1];
+		try {
+			let init_schema = `mongoose.model('${name}', new mongoose.Schema(${source}))`;
+			console.log(init_schema);
+			eval(init_schema);
+		} catch (e) {
+			console.log('schema error:', e.message);
+		}
+	}
+
+	schema_loaded = true;
+}
 
 // subscribe needs its own client
 const redis_sub = redis.createClient('redis://redis');
@@ -30,7 +52,7 @@ redis_sub.on('message', function(channel, message){
 		delete mongoose.models[schema_name];
 		delete mongoose.modelSchemas[schema_name];
 
-		redis_cli.get('schema:'+schema_name, (err, schema_source)=>{
+		redis_cli.hget('schema:'+schema_name, 'source', (err, schema_source)=>{
 			try {
 				eval(`mongoose.model('${schema_name}', new mongoose.Schema(${schema_source}))`);
 			} catch (e) {
@@ -74,7 +96,7 @@ function create_func (code) {
 
 	// add some useful libs to context
 	context.redis = redis_cli_vm;
-	context.mongoose = mongoose;
+	context.schema = mongoose.models;
 	context.console = console;
 	context.env = vm_env;
 	context.ctx_queue = [];	// shared queue to store req/res
@@ -85,6 +107,10 @@ function create_func (code) {
 
 // script cache
 async function get_func (func_name) {
+	if (!schema_loaded) {
+		await load_schema();
+	}
+
 	let vm_func = vm_lut[func_name];
 
 	// not cached
@@ -182,6 +208,11 @@ router.post('/test', async (ctx, next) => {
 		ctx.body = 'Error';
 		return;
 	}
+
+	if (!schema_loaded) {
+		await load_schema();
+	}
+
 
 	let func_info = create_func(input.js_source);
 
