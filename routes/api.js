@@ -1,4 +1,6 @@
 const router = require('koa-router')()
+const pug = require('pug');
+const path = require('path');
 
 // for function source code storage & messaging
 const bluebird = require('bluebird');
@@ -87,6 +89,46 @@ function wrap (code) {
 	return wrap_code;
 }
 
+// serve js source
+const TEMP_JS_NAME = "pug_temp_js";	
+
+router.get('/pug/js/:name', async (ctx, next) => {
+	let name = ctx.params.name;
+	if (!name) {
+		ctx.throw('Cannot find page', 404);
+		return;
+	}
+
+	if (name === TEMP_JS_NAME) {
+		ctx.body = await redis_cli.getAsync(TEMP_JS_NAME);
+	} else {
+		let key = 'pug:' + name;
+		let js_source = await redis_cli.hgetAsync(key, 'js_source');
+		ctx.body = js_source;
+	}
+});
+
+
+async function pug_render (ctx, name, user_opts) {
+	let pug_info = await redis_cli.hgetallAsync('pug:'+name);
+	if (!pug_info) {
+		ctx.throw('page not found', 404);
+		return;
+	}
+
+	let options = {
+		pretty:true,
+		filename:path.join(__dirname, '../node_modules/pug-bootstrap-attr/_bootstrap.pug'),
+	};
+
+	for (let opt_key in user_opts) {
+		options[opt_key] = user_opts[opt_key];
+	}
+	let code_patched = pug_info.pug_source;
+	code_patched += `\n\tscript(src="/pug/js/${name}",type="text/javascript")`;
+	ctx.body = pug.render(code_patched, options);
+}
+
 function create_func (code) {
 	let wrap_code = wrap(code);
 	let func = vm.createScript(wrap_code);
@@ -99,6 +141,7 @@ function create_func (code) {
 	context.schema = mongoose.models;
 	context.console = console;
 	context.env = vm_env;
+//	context.render = pug_render;
 	context.ctx_queue = [];	// shared queue to store req/res
 
 	// cache
@@ -146,6 +189,7 @@ async function run_func (func_info, ctx) {
 	return new Promise((resolve, reject)=>{
 		ctx.resolve = resolve;
 		ctx.reject = reject;
+		ctx.page = async (name, opts) => {return pug_render(ctx, name, opts)};
 		func_info.context.ctx_queue.push(ctx);
 		func_info.func.runInContext(func_info.context);
 	});
