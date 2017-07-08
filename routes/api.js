@@ -185,11 +185,43 @@ async function get_func (func_name) {
 	}
 }
 
-async function run_func (func_info, ctx) {
+async function run_func (func_info, ctx, is_test) {
 	return new Promise((resolve, reject)=>{
 		ctx.resolve = resolve;
 		ctx.reject = reject;
 		ctx.page = async (name, opts) => {return pug_render(ctx, name, opts)};
+
+		if (is_test) {
+			// fake console.log
+			ctx._log = '';
+			ctx.log = function () {
+				for(let i=0; i<arguments.length; i++){
+					this._log += arguments[i];
+					if (i === arguments.length-1) {
+						this._log += '\n';
+					} else {
+						this._log += ' ';
+					}
+				}
+			}
+
+			Object.defineProperty(ctx, 'result', {
+				set: function (val) {
+					this.body = {
+						res: val,
+						log: this._log
+					}
+				}
+			});
+		} else {
+			ctx.log = console.log;
+			Object.defineProperty(ctx, 'result', {
+				set: function(val){
+					this.body=val
+				}
+			});
+		}
+
 		func_info.context.ctx_queue.push(ctx);
 		func_info.func.runInContext(func_info.context);
 	});
@@ -268,11 +300,12 @@ router.post('/test', async (ctx, next) => {
 				ctx[k] = json[k];
 			}
 		} catch(e) {
+			console.log(e.message);
 		}
 	}
 
 	begin_profile('test');
-	await run_func(func_info, ctx);
+	await run_func(func_info, ctx, true);
 	end_profile();
 });
 

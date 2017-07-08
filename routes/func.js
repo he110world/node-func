@@ -93,6 +93,7 @@ router.post('/func/del', async (ctx, next) => {
 router.post('/func/test', async (ctx, next) => {
 	console.log(ctx.request.body);
 	let result = await ctx.post('/test', ctx.request.body);
+	console.log(result);
 	ctx.body = result;
 //	ctx.body = 'hello';
 //	ctx.redirect('http://api:4000/test');
