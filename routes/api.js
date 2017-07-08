@@ -126,7 +126,11 @@ async function pug_render (ctx, name, user_opts) {
 	}
 	let code_patched = pug_info.pug_source;
 	code_patched += `\n\tscript(src="/pug/js/${name}",type="text/javascript")`;
-	ctx.body = pug.render(code_patched, options);
+	let rendered = pug.render(code_patched, options);
+	console.log(rendered);
+	return rendered;
+//	ctx.body = rendered;
+	//ctx.body = pug.render(code_patched, options);
 }
 
 function create_func (code) {
@@ -141,7 +145,6 @@ function create_func (code) {
 	context.schema = mongoose.models;
 	context.console = console;
 	context.env = vm_env;
-//	context.render = pug_render;
 	context.ctx_queue = [];	// shared queue to store req/res
 
 	// cache
@@ -189,9 +192,16 @@ async function run_func (func_info, ctx, is_test) {
 	return new Promise((resolve, reject)=>{
 		ctx.resolve = resolve;
 		ctx.reject = reject;
-		ctx.page = async (name, opts) => {return pug_render(ctx, name, opts)};
 
 		if (is_test) {
+			ctx.page = async (name, opts) => {
+				let res = await pug_render(ctx, name, opts);
+				console.log('res',res);
+				ctx.body = {
+					res: res,
+					log: ctx._log
+				}
+			};
 			// fake console.log
 			ctx._log = '';
 			ctx.log = function () {
@@ -214,6 +224,9 @@ async function run_func (func_info, ctx, is_test) {
 				}
 			});
 		} else {
+			ctx.page = async (name, opts) => {
+				ctx.body = await pug_render(ctx, name, opts);
+			};
 			ctx.log = console.log;
 			Object.defineProperty(ctx, 'result', {
 				set: function(val){
