@@ -1,0 +1,57 @@
+下载
+
+
+unity网络摄像API源码NatCam Professional - WebCam API v1.53f3
+
+Requires Unity 5.5.0 or higher.
+The NatCam Professional Specification builds upon the Core Specification and Extended Specification by adding major technical features: 
+
+- Blazing fast camera preview (especially on Android). 
+
+- HD. You can view what your phone sees in HD, or even higher resolutions if you wish to. All at a solid framerate. 
+
+- Custom resolutions. The Core Spec allows you to set the camera's resolution. There are also resolution presets for ease of use. 
+
+- Photo capture. The Core Spec allows you to capture high-resolution insta-worthy photos. You also have control over lighting with flash mode access. 
+
+- Focus. Focus on anything you see. It also features focus modes (like autofocus, tap to focus, or even off). 
+
+- Exposure. Set custom exposure bias for properly exposing those under- and over-exposed scenes your app will face. It also features exposure modes (like auto exposure and locked exposure). 
+
+- Zoom. NatCam supports hardware optical zoom. 
+
+- Torch. Switch on and off the device's LED torch. 
+
+- VR support. NatCam is compatible with GearVR and Google Cardboard. Check out a Cardboard VR example here. 
+
+- Barcode Detection. The Extended Spec allows you to detect QR, EAN-13, EAN-8, ISBN, Data Matrix, ITF, PDF-417, Code 39, Code 93, and Code 129 barcodes. 
+
+- Face Tracking. The Extended Spec allows you to detect and track faces in realtime on iOS and Android. 
+
+- Face Landmarks. NatCam Extended can detect face landmarks on platforms that support it. 
+
+- Experimental Text Detection. The Extended Spec provides an experimental, easy-to-use API to detect text from the camera preview. 
+
+- SavePhoto API. The SavePhoto API allows you to save a Texture2D to the device, being able to save to locations including the app documents, the device gallery, and a photo album. This API is limited on Windows and OSX. 
+
+- Video Recording. The Professional Spec allows you to record videos, get the path to the saved videos, and save the videos to the device gallery. Note that this only works on iOS and Android. 
+
+- Preview Data. The Professional Spec gives you access to the native preview data buffer for performing software operations. 
+
+- Preview Frame. The Pro Spec allows you to get the current preview frame on-demand. 
+
+
+
+
+
+
+
+
+
+
+声明：
+资源来自互联网，仅限用于学习研究，请勿用于任何商业用途，请下载24小时内删除！
+-------------------------------------
+6m5m是国内最好的、最安全的游戏素材资源3共享与交易网站，提供各种游戏素材下载，游戏素材交易，游戏源码下载，3d游戏模型，2d游戏图片，游戏音效，原创游戏作品等最新的游戏开发资源。
+-------------------------------------
+www.6m5m.com

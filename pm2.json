@@ -1,0 +1,14 @@
+{
+	"apps":[
+		{
+		"name":"api",
+		"script":"./bin/www",
+		"args":"--mode=api"
+		},
+		{
+		"name":"func",
+		"script":"./bin/www",
+		"args":"--mode=func"
+		}
+	]
+}

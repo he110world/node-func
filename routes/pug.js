@@ -2,12 +2,18 @@ const router = require('koa-router')()
 const pug = require('pug');
 const path = require('path');
 const ip = require('ip');
+const request = require('superagent')
 
 const bluebird = require('bluebird');
 const redis = require('redis');
 const redis_cli = bluebird.promisifyAll(redis.createClient('redis://redis'));
+const fs = bluebird.promisifyAll(require('fs'))
+const AsyncBusboy = require('koa-async-busboy')
 
 const TEMP_JS_NAME = 'pug_temp_js';
+const ASSET_PATH = 'public/assets'
+
+const CWD = process.cwd()
 
 //TODO: fuck this
 const api_host = ip.address() + ':4000';
@@ -22,8 +28,13 @@ function pug_render (code, options, js_name) {
 	return pug.render(code_patched, options);
 }
 
+function get_temp_js(ctx){
+	return `${TEMP_JS_NAME}${ctx.request.ip}`
+}
+
 router.get('/pug', async (ctx, next) => {
-	await redis_cli.delAsync(TEMP_JS_NAME);
+	console.log(ctx.request.ip)
+	await redis_cli.delAsync(get_temp_js(ctx))//TEMP_JS_NAME);
 
 	ctx.redirect('/pug/view/pug-editor');
 //	await ctx.render('pug');
@@ -55,6 +66,29 @@ router.get('/pug/edit/:name', async (ctx, next) => {
 
 //	ctx.body = pug_info;
 });
+
+router.get('/api-proxy/:name', async (ctx, next) => {
+	let name = ctx.params.name
+	try {
+		const url = `http://${api_host}/api/${name}`
+		const result = await request.get(url)
+		ctx.body = result.text
+	} catch (err) {
+		ctx.body = err
+	}
+})
+
+router.post('/api-proxy/:name', async (ctx, next) => {
+	let data = ctx.request.body || {}
+	let name = ctx.params.name
+	try {
+		const url = `http://${api_host}/api/${name}`
+		const result = await request.post(url).send(data)
+		ctx.body = result.text
+	} catch (err) {
+		ctx.body = err
+	}
+})
 
 router.post('/pug/save', async (ctx, next) => {
 	let info = ctx.request.body;
@@ -90,9 +124,10 @@ router.post('/pug/compile', async (ctx, next) => {
 	}
 
 	// save temp js
-	await redis_cli.setAsync(TEMP_JS_NAME, ctx.request.body.js);
+	let js_name = get_temp_js(ctx)
+	await redis_cli.setAsync(js_name/*TEMP_JS_NAME*/, ctx.request.body.js);
 	
-	let html = pug_render(code, options, TEMP_JS_NAME);
+	let html = pug_render(code, options, js_name/*TEMP_JS_NAME*/);
 	ctx.body = {compiled:html};
 });
 
@@ -197,17 +232,71 @@ router.get('/pug/pug/:name', async (ctx, next) => {
 router.get('/pug/js/:name', async (ctx, next) => {
 	let name = ctx.params.name;
 	if (!name) {
-		ctx.throw('Cannot find page', 404);
+		ctx.throw('File not found', 404);
 		return;
 	}
 
-	if (name === TEMP_JS_NAME) {
-		ctx.body = await redis_cli.getAsync(TEMP_JS_NAME);
+	let js_name = get_temp_js(ctx)
+	if (name === js_name/*TEMP_JS_NAME*/) {
+		ctx.body = await redis_cli.getAsync(js_name/*TEMP_JS_NAME*/);
 	} else {
 		let key = 'pug:' + name;
 		let js_source = await redis_cli.hgetAsync(key, 'js_source');
 		ctx.body = js_source;
 	}
 });
+
+router.get('/pug/assets/:name', async (ctx, next) => {
+	ctx.redirect(`/assets/${ctx.params.name}`);
+})
+
+router.post('/pug/assets/delete', async (ctx, next) => {
+	const file = ctx.request.body.file	
+	if (!file) {
+		ctx.throw('File not found', 404)
+		return
+	}
+
+	const path = `${CWD}/${ASSET_PATH}/${file}`
+	try {
+		await fs.unlinkAsync(path)
+		ctx.body = 'ok'
+	} catch (e) {
+		ctx.throw(e, 500)
+	}
+})
+
+router.post('/pug/assets', async (ctx, next) => {
+  const busboy = new AsyncBusboy({
+    headers: ctx.req.headers
+  });
+
+  const resBody = {files: [], fields: []};
+
+  const writes = [];
+
+  await busboy
+    .onFile((fieldname, file, filename, encoding, mimetype) => {
+      const tmpFilePath = `${CWD}/${ASSET_PATH}/${filename}`
+      const write = fs.createWriteStream(tmpFilePath);
+      const obj = {fieldname, filename, encoding, mimetype, tmpFilePath};
+
+      file.pipe(write);
+
+      writes.push(new Promise(resolve => {
+        write.on('finish', () => {
+          resolve(obj);
+        });
+      }));
+    })
+    .onField((fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) => {
+      resBody.fields.push({fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype});
+    })
+    .pipe(ctx.req);
+
+  resBody.files = await Promise.all(writes);
+
+  ctx.body = resBody;	
+})
 
 module.exports = router

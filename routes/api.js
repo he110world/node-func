@@ -5,16 +5,28 @@ const path = require('path');
 // for function source code storage & messaging
 const bluebird = require('bluebird');
 const redis = require('redis');
+const Docker = require('dockerode')
+const docker_vm = new Docker()
+const superagent = require('superagent')
 const redis_cli = bluebird.promisifyAll(redis.createClient('redis://redis'));
 const redis_cli_vm = bluebird.promisifyAll(redis.createClient('redis://redis'));	// redis client for vm
+const mysql = require('mysql2/promise')
+const fs_vm = bluebird.promisifyAll(require('fs'))
 
+let mysql_connection
 let schema_loaded = false;
 
+//mysql
+async function init_mysql () {
+	mysql_connection = await mysql.createConnection({host:'mysql', user: 'root', password: '123456', database: 'test', Promise: bluebird})
+}
+
+init_mysql()
 
 // mongoose
 const mongoose = require('mongoose');
 mongoose.Promise = Promise;
-mongoose.connect('mongodb://mongo:27017/vm');		// mongo client for vm
+//mongoose.connect('mongodb://mongo:27017/vm');		// mongo client for vm
 
 // load mongoose schemas
 async function load_schema () {
@@ -92,6 +104,10 @@ function wrap (code) {
 // serve js source
 const TEMP_JS_NAME = "pug_temp_js";	
 
+function get_temp_js(ctx){
+	return `${TEMP_JS_NAME}${ctx.request.ip}`
+}
+
 router.get('/pug/js/:name', async (ctx, next) => {
 	let name = ctx.params.name;
 	if (!name) {
@@ -99,8 +115,9 @@ router.get('/pug/js/:name', async (ctx, next) => {
 		return;
 	}
 
-	if (name === TEMP_JS_NAME) {
-		ctx.body = await redis_cli.getAsync(TEMP_JS_NAME);
+	let js_name = get_temp_js(ctx)
+	if (name === js_name/*TEMP_JS_NAME*/) {
+		ctx.body = await redis_cli.getAsync(js_name/*TEMP_JS_NAME*/);
 	} else {
 		let key = 'pug:' + name;
 		let js_source = await redis_cli.hgetAsync(key, 'js_source');
@@ -143,7 +160,11 @@ function create_func (code) {
 	// add some useful libs to context
 	context.redis = redis_cli_vm;
 	context.schema = mongoose.models;
+	context.mysql = mysql_connection
+	context.docker = docker_vm
+	context.httpclient = superagent
 	context.console = console;
+	context.fs = fs_vm
 	context.env = vm_env;
 	context.ctx_queue = [];	// shared queue to store req/res
 
@@ -154,7 +175,7 @@ function create_func (code) {
 // script cache
 async function get_func (func_name) {
 	if (!schema_loaded) {
-		await load_schema();
+//		await load_schema();
 	}
 
 	let vm_func = vm_lut[func_name];
@@ -271,8 +292,8 @@ router.get('/api/:func', async (ctx, next) => {
 });
 
 // execute a function
-router.post('/api', async (ctx, next) => {
-	let name = ctx.request.body.func;
+router.post('/api/:func', async (ctx, next) => {
+	let name = ctx.params.func;
 	if (!name) {
 		ctx.body = 'Error';
 		return;
@@ -283,6 +304,12 @@ router.post('/api', async (ctx, next) => {
 	if (!func_info) {
 		ctx.body = 'Error';
 		return;
+	}
+
+	// post data
+	let data = ctx.request.body || {}
+	for(let i in data){
+		ctx[i] = data[i]
 	}
 
 	begin_profile(name);
@@ -299,7 +326,7 @@ router.post('/test', async (ctx, next) => {
 	}
 
 	if (!schema_loaded) {
-		await load_schema();
+//		await load_schema();
 	}
 
 
